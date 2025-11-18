@@ -5,11 +5,47 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def update_board(current_board):
-    # your code here ...
-    updated_board = current_board
+def update_board(board: np.ndarray) -> np.ndarray:
+    """
+    Execute ONE step of Conway's Game of Life
+    for a given binary NumPy array (0 = dead, 1 = alive).
 
-    return updated_board
+    Rules:
+    - Any live cell with <2 live neighbors dies.
+    - Any live cell with 2 or 3 live neighbors lives.
+    - Any live cell with >3 live neighbors dies.
+    - Any dead cell with exactly 3 live neighbors becomes alive.
+    """
+    # Copy so we don’t overwrite original while calculating
+    new_board = board.copy()
+    rows, cols = board.shape
+
+    # Helper: count neighbors around (r, c)
+    def count_neighbors(r, c):
+        # Sum values in the 3×3 block minus the center itself
+        neighbors = board[max(0, r-1):min(rows, r+2),
+                          max(0, c-1):min(cols, c+2)].sum()
+        return neighbors - board[r, c]
+
+    # Apply the rules
+    for r in range(rows):
+        for c in range(cols):
+            live_neighbors = count_neighbors(r, c)
+
+            if board[r, c] == 1:
+                # Live cell rules
+                if live_neighbors < 2 or live_neighbors > 3:
+                    new_board[r, c] = 0
+                else:
+                    new_board[r, c] = 1
+            else:
+                # Dead cell rule
+                if live_neighbors == 3:
+                    new_board[r, c] = 1
+                else:
+                    new_board[r, c] = 0
+
+    return new_board
 
 
 def show_game(game_board, n_steps=10, pause=0.5):
